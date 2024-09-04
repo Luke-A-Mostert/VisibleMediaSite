@@ -1,0 +1,111 @@
+.navbar {
+    width: 100%;
+    height: 100px;
+    background-color: #121619;
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Ensure vertical alignment */
+  }
+  
+  .navbar .leftSide {
+    flex: 50%;
+    display: flex;
+    align-items: center;
+    padding-left: 150px;
+  }
+  
+  .navbar .leftSide img {
+    width: 200px;
+    margin-top: 5px;
+    transition: width 0.3s ease; /* Smooth transition for width changes */
+  }
+  
+  .navbar .rightSide {
+    flex: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 50px;
+  }
+  
+  .navbar a {
+    color: white;
+    text-decoration: none;
+    margin: 20px;
+  }
+  
+  .navbar .rightSide button {
+    background-color: transparent;
+    z-index: 2;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: none;
+  }
+  
+  .navbar .rightSide svg {
+    font-size: 40px;
+  }
+  
+  @media only screen and (max-width: 900px) {
+    .navbar .leftSide {
+      padding-left: 50px;
+    }
+  
+    .navbar .leftSide img {
+      width: 150px; /* Adjust width for medium screens */
+    }
+  }
+  
+  @media only screen and (max-width: 600px) {
+    .navbar .leftSide img {
+      width: 100px; /* Adjust width for small screens */
+    }
+  
+    .navbar .rightSide a {
+      display: none;
+    }
+  
+    .navbar .rightSide button {
+      display: inherit;
+    }
+  }
+
+  .hiddenLinks {
+    position: absolute;
+    top: 15px;
+    right: 0;
+    background-color: #121619;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* Adjust the spacing between the links */
+    padding: 20px 0;
+  }
+
+  .navbar #open {
+    padding-left: 0px;
+  }
+  .navbar #open img {
+    display: none;
+  }
+  
+  .navbar #close img {
+    display: inherit;
+  }
+  
+  .navbar #open .hiddenLinks {
+    display: inherit;
+    margin-left: 30px;
+  }
+  
+  .navbar #close .hiddenLinks {
+    display: none;
+  }
+  
+  .navbar #open a {
+    width: 70px;
+    margin: 5px;
+  }

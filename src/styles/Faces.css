@@ -1,0 +1,259 @@
+
+    /*MAP*/
+
+    #map-container {
+        width: 100%;
+        height: 100%;
+      }
+
+    #map {
+        width: 100%; /* Set the width to a percentage or specific value */
+        height: 98vh; /* Set the height to a specific value */
+        border-radius: 15px; /* Adjust the border radius as needed */
+        overflow: hidden; /* Ensure content within the rounded corners is clipped */
+    }
+
+    .custom-marker-label {
+        position: absolute;
+        top: 40px; /* Adjust top position as needed */
+        left: -4px; /* Adjust left position as needed */
+        font-size: 12px;
+        font-weight: bold;
+        color:#ffffff;
+        
+    }
+
+    /*POPUP*/
+    .custom-popup 
+    {
+        width: 100vw;
+        height: 80vh;
+        max-width: 40%;
+        max-height: 80%;
+        z-index: 1002;
+        position: fixed;
+        background-color: white;
+        border-radius: 10px;
+        overflow-y: hidden;
+        overflow-x: hidden;
+        border: 5px solid rgb(127, 0, 0);
+        position: absolute;
+        flex-direction: column; /* Use flexbox for layout */
+        /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);*/
+        /* Add more styling as needed */
+    }
+
+    .popup-content {
+        text-align: center;
+    }
+
+    .popup-content h1 {
+        font-size: 3vh;
+        color:rgb(127, 0, 0);
+        margin-bottom: -5px;
+        position: relative;
+
+    }
+
+    
+    
+    .title {
+        text-align: center;
+    }
+
+    .info {
+        margin-bottom: 15px;
+    }
+    
+    .info p {
+        margin: 5px 0;
+    }
+
+    .images-container {
+        display: flex;
+        justify-content: center; /* Center the images horizontally */
+        gap: 10px; /* Space between images */
+        position: relative;
+        top: 3vh;
+
+    }
+    
+    .image-item {
+        text-align: center; /* Center text and image */
+
+    }
+    
+    .image-item img {
+        width: 17vw; /* Adjust as needed */
+        height: 25vh;
+        object-fit: cover;
+        border-radius: 10px;
+        display: block;
+        border: 3px solid rgb(127, 0, 0);
+
+    }
+    
+    .image-item p {
+        font-size: 4vh;
+        color:rgb(127, 0, 0);
+        margin-top: 5px; /* Space between image and label */
+        font-weight: bold; /* Make the label bold */
+
+    }
+
+    #mapKeyPopup {
+        position: absolute;
+        width: 350px;
+        height: fit-content;
+        top: 100px;
+        right: 10px;
+        background-color: white;
+        border: 3px solid rgb(127, 0, 0);
+        z-index: 1000; /* Ensure the popup is above other map elements */
+    }
+    .map-key-item {
+        margin-bottom: 5px;
+        margin-top: 5px;
+        margin-left: 5px;
+        margin-right: 5px;
+        font-size: 20px;
+        cursor: default;
+        color: rgb(127, 0, 0);
+        text-indent: -1.0em;
+        padding-left: 1.5em;
+    }
+
+    .map-key-item:hover {
+        color: #ffffff;
+        background: rgb(127, 0, 0);
+    }
+    
+    .close-button 
+    {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        z-index: 1003;
+        cursor: pointer;
+        background: rgb(255, 255, 255);
+        border: none;
+        border-radius: 10px;
+        font-size: 20px;
+        color: rgb(127, 0, 0);
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Add shadow effect */
+    }
+
+    .close-button:hover 
+    {
+        color: #ffffff;
+        background: rgb(127, 0, 0);
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        z-index: 1001; /* Ensure the overlay appears below the popup */
+        pointer-events: auto; /* Enable pointer events to block interaction with the map */
+    }
+
+    .description-box {
+        color: rgb(127, 0, 0); /* Text color inside the colored box */
+        align-items: center;
+        text-align: center; /* Center the text */
+        position: relative;
+        width: 30vw;
+        height: 15vh;
+        top: 21vh;
+        left: 5vw;
+        line-height: 1;
+        overflow: hidden;
+        font-size: 2vh;
+    }
+
+    .custom-popup .title {
+        font-size: 20px; /* Larger font size for pricing title */
+        font-weight: bold; /* Make the title bold */
+        color: #740000; /* Dark red color */
+        margin-bottom: -15px; /* Adjust spacing below the title */
+        line-height: 0.7;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* Three columns */
+        grid-auto-rows: minmax(1vh, 8vh); /* Adjust row height as needed */
+        position: relative;
+        height: 20vh;
+        width: 35vw;
+        gap: 2vw; /* Adjust gap between grid items */
+        row-gap: 1vh;
+        top: 0vh;
+        left: 0vh;
+        transform: translate(7%, -80%);
+        justify-content: center;
+        margin-bottom: 100px;
+
+    }
+    
+    .grid-item {
+        background-color: rgba(255, 215, 0, 0); /* Semi-transparent yellow background */
+        padding: 1vh; /* Adjust padding as needed */
+        border-radius: 5px; /* Rounded corners */
+    }
+    
+    .grid-item h2 {
+        font-size: 20px; /* Larger font size for pricing title */
+        font-weight: bold; /* Make the title bold */
+        color: #740000; /* Dark red color */
+        margin-bottom: -15px; /* Adjust spacing below the title */
+        line-height: 0.7;
+    }
+    
+    .grid-item p {
+        color: #000000; /* Black color */
+        font-size: 2vh;
+    }
+
+    #miniMap {
+        width: 17vw; /* Adjust as needed */
+        height: 25vh;
+        border-radius: 10px;
+        border: 3px solid rgb(127, 0, 0);
+
+    }
+    
+
+    /* Custom info window styling */
+  .custom-info-window {
+    position: relative;
+    padding: 0px; /* Add padding for better layout */
+    box-sizing: border-box; /* Ensures padding does not affect width */
+  }
+
+  /* Style for the custom buttons */
+  .info-window-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    background-color: rgb(127, 0, 0);
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .info-window-button:hover {
+    background-color: #983232;
+  }
+
+  .info-window-close:hover {
+    color: rgb(255, 255, 255);
+    background: rgb(127, 0, 0);
+  }
+
+
