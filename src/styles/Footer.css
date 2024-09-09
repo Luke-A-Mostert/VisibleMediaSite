@@ -10,6 +10,11 @@
   color: white;
 }
 
+.a {
+  color: inherit; /* Makes the link color inherit from the parent element */
+  text-decoration: none; /* Removes the underline from the link */
+}
+
 .footer-item {
   display: flex;
   align-items: center;

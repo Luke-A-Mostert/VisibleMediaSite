@@ -15,12 +15,11 @@ function App() {
           <Route path="/" exact element={<Home />} />
           <Route path="/faces" exact element={<Faces />} />
           <Route path="/about" exact element={Home} />
-          <Route path="/contact" exact element={<Contact />} />
         </Routes>
         <Footer />
       </Router>
     </div>
   );
 }
-
+//<Route path="/contact" exact element={<Contact />} />
 export default App;

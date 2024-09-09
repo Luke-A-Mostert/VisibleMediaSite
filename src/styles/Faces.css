@@ -227,6 +227,9 @@
     }
     
 
+    .gm-style-iw-c button.gm-ui-hover-effect {
+        display: none !important;
+    }
     /* Custom info window styling */
   .custom-info-window {
     position: relative;

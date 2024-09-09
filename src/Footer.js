@@ -7,10 +7,10 @@ const Footer = () => {
   return (
     <div className="footer">
       <div className="footer-item">
-        <Link to="/contact" className="contact-link">
-          <EmailIcon />
-          <p>Visible_Media@yahoo.com</p>
-        </Link>
+        <EmailIcon />
+        <a href="mailto:Visible_Media@yahoo.com" className="contact-link">
+          Visible_Media@yahoo.com
+        </a>
       </div>
       <div className="footer-item">
         <div className="phone-item">

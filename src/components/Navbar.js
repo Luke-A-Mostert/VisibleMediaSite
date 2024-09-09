@@ -32,17 +32,15 @@ const Navbar = () => {
         </Link>
         <div className="hiddenLinks">
           <Link to="/">Home</Link>
-          <Link to="/faces">Faces</Link>
           <Link to="/about">About</Link>
-          <Link to="/contact">Contact</Link>
+          <Link to="/faces">Faces</Link>
         </div>
       </div>
 
       <div className="rightSide">
         <Link to="/">Home</Link>
-        <Link to="/faces">Faces</Link>
         <Link to="/about">About</Link>
-        <Link to="/contact">Contact</Link>
+        <Link to="/faces">Faces</Link>
         <button onClick={toggleNavbar}>
           <ReorderIcon />
         </button>
@@ -50,5 +48,6 @@ const Navbar = () => {
     </div>
   );
 };
+//          <Link to="/contact">Contact</Link>
 
 export default Navbar;

@@ -1,15 +1,18 @@
 //"AIzaSyAKOyMHZfi2ohBLCjxiOVx0-pz_kumZ-fA"
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   GoogleMap,
   useJsApiLoader,
   Marker,
   InfoWindow,
+  MarkerClusterer,
 } from "@react-google-maps/api";
+import markerIcon from "../assets/markertest.png";
 import "../styles/Faces.css";
 
 const MAP_LIBRARIES = ["places"];
+var infoWindow;
 
 const containerStyle = {
   width: "100%",
@@ -32,12 +35,28 @@ const Faces = () => {
   const [panelData, setPanelData] = useState({});
   const [currentInfoWindow, setCurrentInfoWindow] = useState(null);
   const [popupContent, setPopupContent] = useState(null);
+  const [activeMarker, setActiveMarker] = useState(null);
 
   useEffect(() => {
     if (isLoaded) {
       fetchBoardData();
     }
   }, [isLoaded]);
+
+  const handleActiveMarker = useCallback(
+    (marker) => {
+      // Compare by id or unique identifier to avoid object reference issues
+      if (marker.id === activeMarker?.id) {
+        return;
+      }
+      setActiveMarker(marker);
+    },
+    [activeMarker]
+  );
+
+  const handleOnLoad = (marker) => {
+    //console.log("marker: ", marker);
+  };
 
   const fetchBoardData = () => {
     fetch("/Data/boards.csv")
@@ -136,16 +155,15 @@ const Faces = () => {
     setMarkers(newMarkers);
   };
 
-  const handleMarkerClick = (marker) => {
-    const contentString = `
-      <h1>${marker.info.Loc}</h1>
-      <p><strong>Traffic:</strong> ${marker.info.Traffic}</p>
-      <p><strong>Size:</strong> ${marker.info.BoardSize}</p>
-    `;
-    setPopupContent({
-      position: marker.position,
-      content: contentString,
-    });
+  const handleButtonClick = (buttonType) => {
+    //console.log(`${buttonType} button clicked for marker ${activeMarker}`);
+    // Add your logic for button clicks here
+  };
+
+  const handleMapClick = () => {
+    if (activeMarker) {
+      setActiveMarker(null); // Close the InfoWindow
+    }
   };
 
   return isLoaded ? (
@@ -153,22 +171,48 @@ const Faces = () => {
       mapContainerStyle={containerStyle}
       center={center}
       zoom={10}
+      onClick={handleMapClick}
       onLoad={(map) => setMap(map)}
     >
       {markers.map((marker, index) => (
         <Marker
           key={index}
           position={marker.position}
-          onClick={() => handleMarkerClick(marker)}
-          label={marker.id}
+          onLoad={handleOnLoad}
+          onClick={() => handleActiveMarker(marker)}
+          label={{
+            text: marker.id, // Display ID as the label on the marker
+            className: "custom-marker-label",
+            color: "white",
+          }}
+          icon={{
+            url: markerIcon,
+            scaledSize: new google.maps.Size(20, 30),
+          }}
         />
       ))}
-      {popupContent && (
+
+      {activeMarker && (
         <InfoWindow
-          position={popupContent.position}
-          onCloseClick={() => setPopupContent(null)}
+          position={activeMarker.position}
+          onCloseClick={() => setActiveMarker(null)}
         >
-          <div dangerouslySetInnerHTML={{ __html: popupContent.content }} />
+          <div class="custom-info-window">
+            <div class="info-window-buttons">
+              <button
+                class="info-window-button"
+                onClick={() => handleButtonClick("Panel1")}
+              >
+                Show Panel 1
+              </button>
+              <button
+                class="info-window-button"
+                onClick={() => handleButtonClick("Panel2")}
+              >
+                Show Panel 2
+              </button>
+            </div>
+          </div>
         </InfoWindow>
       )}
     </GoogleMap>
