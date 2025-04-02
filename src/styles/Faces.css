@@ -11,6 +11,7 @@
         height: 98vh; /* Set the height to a specific value */
         border-radius: 15px; /* Adjust the border radius as needed */
         overflow: hidden; /* Ensure content within the rounded corners is clipped */
+        z-index: 1;
     }
 
     .custom-marker-label {

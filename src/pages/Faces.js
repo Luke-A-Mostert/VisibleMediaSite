@@ -10,6 +10,7 @@ import {
 } from "@react-google-maps/api";
 import markerIcon from "../assets/markertest.png";
 import "../styles/Faces.css";
+import Popup from "../components/Popups";
 
 const MAP_LIBRARIES = ["places"];
 var infoWindow;
@@ -36,6 +37,8 @@ const Faces = () => {
   const [currentInfoWindow, setCurrentInfoWindow] = useState(null);
   const [popupContent, setPopupContent] = useState(null);
   const [activeMarker, setActiveMarker] = useState(null);
+  const [buttonPopup, setButtonPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     if (isLoaded) {
@@ -138,6 +141,7 @@ const Faces = () => {
 
   const initializeMarkers = (panelData) => {
     const newMarkers = [];
+
     Object.keys(panelData).forEach((boardId) => {
       const board = panelData[boardId];
       const firstPanel =
@@ -152,12 +156,42 @@ const Faces = () => {
         id: boardId,
       });
     });
+
     setMarkers(newMarkers);
   };
 
-  const handleButtonClick = (buttonType) => {
-    //console.log(`${buttonType} button clicked for marker ${activeMarker}`);
-    // Add your logic for button clicks here
+  const handleButtonClick = (panelId) => {
+    console.log(`Button clicked for panel ${panelId}`);
+    const panelInfo = panelData[activeMarker.id].panels[panelId];
+
+    if (panelInfo) {
+      const popupHtml = `
+        <div class="popup-content">
+
+        <h1>${panelInfo.Loc}</h1>
+        <div class="images-container">
+          <div class="image-item">
+            <img src="Data/${panelInfo.Img}" alt="Billboard Image" />
+            <p><strong>${panelInfo.Facing} Face</strong></p>
+          </div>
+          <div id="miniMap"></div>
+        </div>
+        <div class="description-box">
+          <p>${panelInfo.Description}</p>
+        </div>
+        <div class="grid-container">
+          <div class="grid-item"><strong>Board Number</strong><p>${panelInfo.ID}</p></div>
+          <div class="grid-item"><strong>Traffic</strong><p>${panelInfo.Traffic}</p></div>
+          <div class="grid-item"><strong>Board Size</strong><p>${panelInfo.BoardSize}</p></div>
+          <div class="grid-item"><strong>Lat/Long</strong><p><a href="https://www.google.com/maps?q=${panelInfo.Lat},${panelInfo.Long}" target="_blank" rel="noopener noreferrer">${panelInfo.Lat}, ${panelInfo.Long}</a></p></div>
+          <div class="grid-item"><strong>Pricing</strong><p>${panelInfo.Pricing}</p></div>
+          <div class="grid-item"><strong>Illuminated</strong><p>${panelInfo.Illuminated}</p></div>
+        </div>
+      </div>
+      `;
+      setPopupContent(popupHtml);
+      setShowPopup(true); // Show the popup
+    }
   };
 
   const handleMapClick = () => {
@@ -166,56 +200,84 @@ const Faces = () => {
     }
   };
 
-  return isLoaded ? (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      center={center}
-      zoom={10}
-      onClick={handleMapClick}
-      onLoad={(map) => setMap(map)}
-    >
-      {markers.map((marker, index) => (
-        <Marker
-          key={index}
-          position={marker.position}
-          onLoad={handleOnLoad}
-          onClick={() => handleActiveMarker(marker)}
-          label={{
-            text: marker.id, // Display ID as the label on the marker
-            className: "custom-marker-label",
-            color: "white",
-          }}
-          icon={{
-            url: markerIcon,
-            scaledSize: new google.maps.Size(20, 30),
-          }}
-        />
-      ))}
+  const closePopup = () => {
+    setShowPopup(false);
+  };
 
-      {activeMarker && (
-        <InfoWindow
-          position={activeMarker.position}
-          onCloseClick={() => setActiveMarker(null)}
-        >
-          <div class="custom-info-window">
-            <div class="info-window-buttons">
-              <button
-                class="info-window-button"
-                onClick={() => handleButtonClick("Panel1")}
-              >
-                Show Panel 1
-              </button>
-              <button
-                class="info-window-button"
-                onClick={() => handleButtonClick("Panel2")}
-              >
-                Show Panel 2
-              </button>
+  //const handlePanels = (activeMarker) => {
+  //  const board = panelData[activeMarker.id];
+  //  //console.log(board.panels);
+  //
+  //  var panelsArr = [];
+  //  Object.keys(board.panels).forEach((panelId) => {
+  //    panelsArr.push(board.panels[panelId]);
+  //  });
+  //
+  //  const panel1 = panelsArr[0];
+  //  const panel2 = panelsArr[1];
+  //  setPanel(panelsArr);
+  //};
+
+  return isLoaded ? (
+    <>
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={center}
+        zoom={10}
+        onClick={handleMapClick}
+        onLoad={(map) => setMap(map)}
+      >
+        {markers.map((marker, index) => (
+          <Marker
+            key={index}
+            position={marker.position}
+            onLoad={handleOnLoad}
+            onClick={() => handleActiveMarker(marker)}
+            label={{
+              text: marker.id, // Display ID as the label on the marker
+              className: "custom-marker-label",
+              color: "white",
+            }}
+            icon={{
+              url: markerIcon,
+              scaledSize: new google.maps.Size(20, 30),
+            }}
+          />
+        ))}
+
+        {activeMarker && (
+          <InfoWindow
+            position={activeMarker.position}
+            onCloseClick={() => setActiveMarker(null)}
+          >
+            <div class="custom-info-window">
+              <div class="info-window-buttons">
+                {/* Display buttons dynamically based on panels */}
+                {Object.keys(panelData[activeMarker.id].panels).map(
+                  (panelId) => (
+                    <button
+                      key={panelId}
+                      class="info-window-button"
+                      onClick={() => handleButtonClick(panelId)} // Correct React syntax
+                    >
+                      Show Panel {panelId}
+                    </button>
+                  )
+                )}
+              </div>
             </div>
-          </div>
-        </InfoWindow>
+          </InfoWindow>
+        )}
+      </GoogleMap>
+      {showPopup && (
+        <div className="custom-popup">
+          <button onClick={closePopup} className="close-button">
+            X
+          </button>
+          <div dangerouslySetInnerHTML={{ __html: popupContent }} />
+        </div>
       )}
-    </GoogleMap>
+    </>
   ) : (
     <></>
   );
