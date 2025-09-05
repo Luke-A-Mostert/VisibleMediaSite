@@ -1,19 +1,9 @@
-//"AIzaSyAKOyMHZfi2ohBLCjxiOVx0-pz_kumZ-fA"
-
-import React, { useEffect, useState, useCallback } from "react";
-import {
-  GoogleMap,
-  useJsApiLoader,
-  Marker,
-  InfoWindow,
-  MarkerClusterer,
-} from "@react-google-maps/api";
+import React, { useEffect, useState } from "react";
+import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import markerIcon from "../assets/markertest.png";
 import "../styles/Faces.css";
-import Popup from "../components/Popups";
 
 const MAP_LIBRARIES = ["places"];
-var infoWindow;
 
 const containerStyle = {
   width: "100%",
@@ -33,12 +23,9 @@ const Faces = () => {
 
   const [map, setMap] = useState(null);
   const [markers, setMarkers] = useState([]);
-  const [panelData, setPanelData] = useState({});
-  const [currentInfoWindow, setCurrentInfoWindow] = useState(null);
-  const [popupContent, setPopupContent] = useState(null);
-  const [activeMarker, setActiveMarker] = useState(null);
-  const [buttonPopup, setButtonPopup] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [selectedFlyer, setSelectedFlyer] = useState(null);
+  const [showMapKey, setShowMapKey] = useState(true);
 
   useEffect(() => {
     if (isLoaded) {
@@ -46,23 +33,8 @@ const Faces = () => {
     }
   }, [isLoaded]);
 
-  const handleActiveMarker = useCallback(
-    (marker) => {
-      // Compare by id or unique identifier to avoid object reference issues
-      if (marker.id === activeMarker?.id) {
-        return;
-      }
-      setActiveMarker(marker);
-    },
-    [activeMarker]
-  );
-
-  const handleOnLoad = (marker) => {
-    //console.log("marker: ", marker);
-  };
-
   const fetchBoardData = () => {
-    fetch("/Data/boards.csv")
+    fetch("/Data/newboards.csv")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -70,12 +42,13 @@ const Faces = () => {
         return response.text();
       })
       .then((csv) => {
-        const lines = csv.split("\n").filter((line) => line.trim() !== ""); // Split and filter out empty lines
-        const newPanelData = {};
+        const lines = csv.split("\n").filter((line) => line.trim() !== "");
+        const newMarkers = [];
 
         lines.forEach((line, index) => {
           if (index === 0) return; // Skip header line
 
+          // Handle CSV parsing for 5 columns: ID, Img, Lat, Long, Name
           let values = [];
           let insideQuotes = false;
           let currentValue = "";
@@ -93,130 +66,72 @@ const Faces = () => {
           }
           values.push(currentValue.trim());
 
-          if (values.length === 11) {
-            const [
-              ID,
-              Lat,
-              Long,
-              Traffic,
-              Loc,
-              BoardSize,
-              Img,
-              Facing,
-              Pricing,
-              Illuminated,
-              Description,
-            ] = values;
+          if (values.length >= 4) {
+            // Handle both 4-column and 5-column formats
+            const [ID, Img, Lat, Long, Name = `Location ${ID}`] = values;
 
-            const boardId = ID.slice(0, -1);
-            const panelId = ID.slice(-1);
-
-            if (!newPanelData[boardId]) {
-              newPanelData[boardId] = { Lat, Long, panels: {} };
-            }
-            newPanelData[boardId].panels[panelId] = {
-              ID,
-              Lat,
-              Long,
-              Traffic,
-              Loc,
-              BoardSize,
-              Img,
-              Facing,
-              Pricing,
-              Illuminated,
-              Description,
-            };
+            newMarkers.push({
+              position: {
+                lat: parseFloat(Lat),
+                lng: parseFloat(Long),
+              },
+              title: ID,
+              id: ID,
+              name: Name,
+              image: Img,
+            });
           } else {
             console.error(
-              `Error parsing CSV line ${index + 1}: Incorrect number of values.`
+              `Error parsing CSV line ${
+                index + 1
+              }: Expected at least 4 values, got ${values.length}`
             );
           }
         });
-        setPanelData(newPanelData);
-        initializeMarkers(newPanelData);
+
+        setMarkers(newMarkers);
       })
       .catch((error) => console.error("Error fetching the CSV file:", error));
   };
 
-  const initializeMarkers = (panelData) => {
-    const newMarkers = [];
-
-    Object.keys(panelData).forEach((boardId) => {
-      const board = panelData[boardId];
-      const firstPanel =
-        board.panels["N"] ||
-        board.panels["S"] ||
-        board.panels["W"] ||
-        board.panels["E"];
-      newMarkers.push({
-        position: { lat: parseFloat(board.Lat), lng: parseFloat(board.Long) },
-        title: boardId,
-        info: firstPanel,
-        id: boardId,
-      });
-    });
-
-    setMarkers(newMarkers);
+  const handleMarkerClick = (marker) => {
+    if (marker.image) {
+      // Check if the image path already includes "Data/" or if it's just the filename
+      const imagePath = marker.image.startsWith("Data/")
+        ? marker.image
+        : `Data/${marker.image}`;
+      setSelectedFlyer(imagePath);
+      setShowPopup(true);
+    }
   };
 
-  const handleButtonClick = (panelId) => {
-    console.log(`Button clicked for panel ${panelId}`);
-    const panelInfo = panelData[activeMarker.id].panels[panelId];
+  const handleKeyLocationClick = (marker) => {
+    // Same function as marker click but triggered from the key
+    handleMarkerClick(marker);
 
-    if (panelInfo) {
-      const popupHtml = `
-        <div class="popup-content">
-
-        <h1>${panelInfo.Loc}</h1>
-        <div class="images-container">
-          <div class="image-item">
-            <img src="Data/${panelInfo.Img}" alt="Billboard Image" />
-            <p><strong>${panelInfo.Facing} Face</strong></p>
-          </div>
-          <div id="miniMap"></div>
-        </div>
-        <div class="description-box">
-          <p>${panelInfo.Description}</p>
-        </div>
-        <div class="grid-container">
-          <div class="grid-item"><strong>Board Number</strong><p>${panelInfo.ID}</p></div>
-          <div class="grid-item"><strong>Traffic</strong><p>${panelInfo.Traffic}</p></div>
-          <div class="grid-item"><strong>Board Size</strong><p>${panelInfo.BoardSize}</p></div>
-          <div class="grid-item"><strong>Lat/Long</strong><p><a href="https://www.google.com/maps?q=${panelInfo.Lat},${panelInfo.Long}" target="_blank" rel="noopener noreferrer">${panelInfo.Lat}, ${panelInfo.Long}</a></p></div>
-          <div class="grid-item"><strong>Pricing</strong><p>${panelInfo.Pricing}</p></div>
-          <div class="grid-item"><strong>Illuminated</strong><p>${panelInfo.Illuminated}</p></div>
-        </div>
-      </div>
-      `;
-      setPopupContent(popupHtml);
-      setShowPopup(true); // Show the popup
+    // Optional: Pan the map to the selected location
+    if (map) {
+      map.panTo(marker.position);
+      map.setZoom(12);
     }
   };
 
   const handleMapClick = () => {
-    if (activeMarker) {
-      setActiveMarker(null); // Close the InfoWindow
+    // Close popup when clicking on map
+    if (showPopup) {
+      setShowPopup(false);
+      setSelectedFlyer(null);
     }
   };
 
   const closePopup = () => {
     setShowPopup(false);
+    setSelectedFlyer(null);
   };
 
-  //const handlePanels = (activeMarker) => {
-  //  const board = panelData[activeMarker.id];
-  //  //console.log(board.panels);
-  //
-  //  var panelsArr = [];
-  //  Object.keys(board.panels).forEach((panelId) => {
-  //    panelsArr.push(board.panels[panelId]);
-  //  });
-  //
-  //  const panel1 = panelsArr[0];
-  //  const panel2 = panelsArr[1];
-  //  setPanel(panelsArr);
-  //};
+  const toggleMapKey = () => {
+    setShowMapKey(!showMapKey);
+  };
 
   return isLoaded ? (
     <>
@@ -231,10 +146,9 @@ const Faces = () => {
           <Marker
             key={index}
             position={marker.position}
-            onLoad={handleOnLoad}
-            onClick={() => handleActiveMarker(marker)}
+            onClick={() => handleMarkerClick(marker)}
             label={{
-              text: marker.id, // Display ID as the label on the marker
+              text: marker.id.toString(),
               className: "custom-marker-label",
               color: "white",
             }}
@@ -244,37 +158,59 @@ const Faces = () => {
             }}
           />
         ))}
-
-        {activeMarker && (
-          <InfoWindow
-            position={activeMarker.position}
-            onCloseClick={() => setActiveMarker(null)}
-          >
-            <div class="custom-info-window">
-              <div class="info-window-buttons">
-                {/* Display buttons dynamically based on panels */}
-                {Object.keys(panelData[activeMarker.id].panels).map(
-                  (panelId) => (
-                    <button
-                      key={panelId}
-                      class="info-window-button"
-                      onClick={() => handleButtonClick(panelId)} // Correct React syntax
-                    >
-                      Show Panel {panelId}
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
-          </InfoWindow>
-        )}
       </GoogleMap>
-      {showPopup && (
-        <div className="custom-popup">
-          <button onClick={closePopup} className="close-button">
-            X
+
+      {/* Map Key Panel */}
+      <div
+        className={`map-key-panel ${
+          showMapKey ? "map-key-open" : "map-key-closed"
+        }`}
+      >
+        <div className="map-key-header">
+          <h3>Billboard Locations</h3>
+          <button className="map-key-toggle" onClick={toggleMapKey}>
+            {showMapKey ? "−" : "+"}
           </button>
-          <div dangerouslySetInnerHTML={{ __html: popupContent }} />
+        </div>
+        {showMapKey && (
+          <div className="map-key-content">
+            {markers.map((marker, index) => (
+              <div
+                key={index}
+                className="map-key-item"
+                onClick={() => handleKeyLocationClick(marker)}
+              >
+                <div className="key-item-main">
+                  <span className="key-marker-id">{marker.id}</span>
+                  <span className="key-location-name">{marker.name}</span>
+                </div>
+                <span className="key-location-coords">
+                  {marker.position.lat.toFixed(4)},{" "}
+                  {marker.position.lng.toFixed(4)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Simple Flyer Image Popup */}
+      {showPopup && selectedFlyer && (
+        <div className="flyer-popup" onClick={closePopup}>
+          <div className="flyer-container" onClick={(e) => e.stopPropagation()}>
+            <button onClick={closePopup} className="close-button">
+              ×
+            </button>
+            <img
+              src={selectedFlyer}
+              alt="Billboard Flyer"
+              className="flyer-image"
+              onError={(e) => {
+                console.error(`Failed to load image: ${selectedFlyer}`);
+                e.target.style.display = "none";
+              }}
+            />
+          </div>
         </div>
       )}
     </>
